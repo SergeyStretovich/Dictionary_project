@@ -1,26 +1,12 @@
 package pkg
 
 import com.typesafe.config.ConfigFactory
-import org.mongodb.scala._
-//import org.bson.{BsonObjectId, BsonString}
-import org.mongodb.scala.bson.{BsonArray, BsonBoolean, BsonInt32, BsonObjectId,BsonString}
+import org.mongodb.scala.bson.{BsonArray, BsonBoolean, BsonInt32, BsonObjectId, BsonString}
 import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoDatabase}
-//import org.mongodb.scala.bson.{BsonObjectId, BsonString}
-import org.mongodb.scala.model.Filters.regex
+import org.mongodb.scala.model.Aggregates._
+import org.mongodb.scala.model.Filters.{regex, _}
 import pkg.MongoAccessWrapper._
-import org.mongodb.scala.model.Aggregates._
-import org.mongodb.scala.model._
-import scala.collection.immutable.IndexedSeq
-import org.mongodb.scala._
-import org.mongodb.scala.bson.conversions
-import org.mongodb.scala.model.Aggregates._
-import org.mongodb.scala.model.Filters._
-//import org.mongodb.scala.model.
-import org.mongodb.scala.model.Projections._
-import org.mongodb.scala.model.Sorts._
 import org.mongodb.scala.model.Updates._
-import org.mongodb.scala.model._
-import org.mongodb.scala.model.FindOptions
 
 object MongoHelper
 {
@@ -47,8 +33,6 @@ object MongoHelper
     val pattern="^"+prefix;
     collection.find(regex("word", pattern)).results().map(x=>WordItem(0,x.get("word").getOrElse(0).asInstanceOf[BsonString].getValue().toString,
       x.get("translation").getOrElse(0).asInstanceOf[BsonString].getValue().toString)).toList
-
-    // mongoClient.close();
   }
   def getWordsTotal(): List[WordItem] =
   {
@@ -58,8 +42,6 @@ object MongoHelper
     collection.find().results().map(x=>WordItem(x.get("_id").getOrElse(0).asInstanceOf[BsonInt32].getValue().toInt,
       x.get("word").getOrElse(0).asInstanceOf[BsonString].getValue().toString,
       x.get("translation").getOrElse(0).asInstanceOf[BsonString].getValue().toString)).toList
-
-    // mongoClient.close();
   }
    def getUserWordsCards_check(): List[WordCard] =
   {
@@ -73,7 +55,6 @@ object MongoHelper
       x.get("customTranslation").getOrElse(0).asInstanceOf[BsonString].getValue().toString,
       x.get("isLearned").getOrElse(0).asInstanceOf[BsonBoolean].getValue()
     )
-   // println(x.get("_id").getOrElse(0).asInstanceOf[BsonObjectId].getValue())
     ).toList
   }
   def insertWordCardsTotal(userId:Int): Unit =
@@ -118,17 +99,6 @@ object MongoHelper
        false
      )
    ).toList.filter(x=>x.word.startsWith(wordIndex))
-/**/
-/*
-   something.foreach(x=>
-    println( x.get("_id").getOrElse(0).asInstanceOf[BsonObjectId].getValue().toString+" "+
-     x.get("userId").getOrElse(0).asInstanceOf[BsonInt32].getValue().toInt+" "+
-     x.get("wordId").getOrElse(0).asInstanceOf[BsonInt32].getValue().toInt+" "+
-     x.get("custom").getOrElse(0).asInstanceOf[BsonString].getValue().toString +" "+
-     x.get("total").getOrElse(0).asInstanceOf[BsonArray].getValues().get(0).toString.split(",")(1).toString.replace(""""word" : ""","").replace('"','\0').trim
-   )
-   )
-*/
     something
   }
   def getUserWordCardsToEdit(userId:Int, wordIndex:String): List[WordCard] =
@@ -150,17 +120,6 @@ object MongoHelper
           x.get("isLearned").getOrElse(0).asInstanceOf[BsonBoolean].getValue()
         )
       ).toList.filter(x=>x.word.startsWith(wordIndex))
-    /**/
-    /*
-       something.foreach(x=>
-        println( x.get("_id").getOrElse(0).asInstanceOf[BsonObjectId].getValue().toString+" "+
-         x.get("userId").getOrElse(0).asInstanceOf[BsonInt32].getValue().toInt+" "+
-         x.get("wordId").getOrElse(0).asInstanceOf[BsonInt32].getValue().toInt+" "+
-         x.get("custom").getOrElse(0).asInstanceOf[BsonString].getValue().toString +" "+
-         x.get("total").getOrElse(0).asInstanceOf[BsonArray].getValues().get(0).toString.split(",")(1).toString.replace(""""word" : ""","").replace('"','\0').trim
-       )
-       )
-    */
     something
   }
   def getRandomWords(count:Int): List[WordItem] =
@@ -179,12 +138,10 @@ object MongoHelper
     val mongoClient: MongoClient =  MongoClient(getMongoDbConfig(),None)
     val database: MongoDatabase = mongoClient.getDatabase("mydb")
     val collection: MongoCollection[Document] = database.getCollection("userwords")
-   // val result:Long =collection.count(filter((and(equal("userId", userId),equal("isLearned",true))))).results().asInstanceOf[Long]
     val result =collection.find(and(equal("userId", userId),equal("isLearned",true))).results().size
 
     //val result =collection.count().results()(0)
     val stringified=result.toString
-    //println(result)
     stringified
   }
   def UpdateWordCardsetLearned(wordCardId:String): Unit =
@@ -192,7 +149,6 @@ object MongoHelper
     val mongoClient: MongoClient =  MongoClient(getMongoDbConfig(),None)
     val database: MongoDatabase = mongoClient.getDatabase("mydb")
     val collection: MongoCollection[Document] = database.getCollection("userwords")
-    // val result:Long =collection.count(filter((and(equal("userId", userId),equal("isLearned",true))))).results().asInstanceOf[Long]
     val result =collection.updateOne(equal("_id", BsonObjectId(wordCardId)), set("isLearned", true)).headResult()
   }
   def UpdateWordCardsetTranslation(wordCardId:String,translation:String): Unit =
@@ -200,7 +156,6 @@ object MongoHelper
     val mongoClient: MongoClient =  MongoClient(getMongoDbConfig(),None)
     val database: MongoDatabase = mongoClient.getDatabase("mydb")
     val collection: MongoCollection[Document] = database.getCollection("userwords")
-    // val result:Long =collection.count(filter((and(equal("userId", userId),equal("isLearned",true))))).results().asInstanceOf[Long]
     val result =collection.updateOne(equal("_id", BsonObjectId(wordCardId)), set("customTranslation", translation)).headResult()
   }
 }
