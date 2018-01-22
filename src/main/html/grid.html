@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<style>
+html, body{
+    height: 100%;
+}
+.Table
+    {
+        display: table;
+		margin:auto;
+		border-spacing:6px;
+    }
+    .Title
+    {
+        display: table-caption;
+        text-align: center;
+        font-weight: bold;
+        font-size: larger;
+    }
+    .Row
+    {
+        display: table-row;
+		height:20px;
+    }
+    .Cell
+    {
+        display: table-cell;
+        border: solid;
+        border-width: thin;
+        padding-left: 5px;
+        padding-right: 5px;
+		width:9%;
+		height:20px;
+
+    font-family: Verdana, Arial, Helvetica, sans-serif; 
+    font-size: 22pt;
+    font-weight: bold;	
+	
+	
+    }
+h1,h2{
+ margin:auto; text-align: center;
+}
+</style>
+<script src="./app/words.js"></script>
+
+<script>
+var colors=["#FE9A2E","#DEB887","#FAFAD2","#FFFFFF","#3CB371","#DA70D6","#00FF00","#87CEFA","#7FFFD4","#7B68EE","#FF0040","#00BFFF","#FFFF00","#90EE90","#BA55D3","#CC7722","#F6E3CE","#EE82EE","#87CEEB","#CD5C5C","#DAA520","#FF69B4","#32CD32","#F8F8FF","#20B2AA","#B0E0E6"];
+function cellClick(idx)
+{
+	var word=document.getElementById(idx).innerHTML;
+	//alert(word);
+	localStorage.setItem("wordFilter", word);
+	window.location.href = "wordsgame.html";
+}
+function genDivs(h,v)
+{ 
+var username=localStorage.getItem("currentUserName");
+var username="You login as "+username;
+document.getElementById("login").innerHTML=username;
+       var idg=0;
+	   var firstLetter="a";
+	   var colorcounter=0;
+      //var e = document.body; // whatever you want to append the rows to: 
+      for(var i = 0; i < h; i++){ 
+        var row = document.createElement("div"); 
+        row.className = "Row"; 
+        for(var x = 1; x <= v; x++){ 
+            var cell = document.createElement("div"); 
+            cell.className = "Cell"; 
+			
+			if(combs[idg]!=undefined)
+			{
+			   cell.id=combs[idg];
+               cell.innerText = combs[idg];
+			   var clickfunc="cellClick(this.id)";
+			   cell.setAttribute("onclick",clickfunc);
+			   if(combs[idg][0]!=firstLetter)
+			   {
+			       firstLetter=combs[idg][0];
+				   colorcounter++;
+			   }
+			   var bgcolor="background-color:"+colors[colorcounter]+";";
+			   cell.setAttribute("style",bgcolor);	
+			}
+			idg++;
+            row.appendChild(cell); 
+        } 
+         document.getElementById("wrapper").appendChild(row); 
+      }      
+
+    }
+//  http://jsfiddle.net/markgonz007/3zo91e1o/
+//  https://www.w3schools.com/html/html5_webstorage.asp
+//  https://developer.mozilla.org/ru/docs/Web/API/Storage/setItem
+//  https://htmlacademy.ru/blog/29-display-table-anti-hero
+//  https://css-tricks.com/almanac/properties/f/float/
+//  http://www.dummies.com/web-design-development/css3/using-the-div-tag-to-create-tables/
+</script>
+<body>
+<h2>Lessons grid</h2>
+<br/>
+<h2 id="login" style="" ></h2>
+<br/>
+<div id='wrapper' class="Table"></div>
+</body>
+<script>
+genDivs(8,10);
+</script>
+</html>

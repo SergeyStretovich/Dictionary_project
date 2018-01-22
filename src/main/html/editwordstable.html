@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<style>
+html, body{
+    height: 100%;
+}
+.Table
+    {
+        display: table;
+		margin:auto;
+		border-spacing:6px;
+    }
+    .Title
+    {
+        display: table-caption;
+        text-align: center;
+        font-weight: bold;
+        font-size: larger;
+    }
+    .Row
+    {
+        display: table-row;
+		height:20px;
+    }
+    .Cell
+    {
+        display: table-cell;
+        border: solid;
+        border-width: thin;
+        padding-left: 5px;
+        padding-right: 5px;
+		width:9%;
+		height:20px;
+
+    font-family: Verdana, Arial, Helvetica, sans-serif; 
+    font-size: 22pt;
+    font-weight: bold;	
+	
+	
+    }
+h1,h2{
+ margin:auto; text-align: center;
+}
+</style>
+<script src="./app/words.js"></script>
+
+<script>
+var colors=["#FE9A2E","#DEB887","#FAFAD2","#FFFFFF","#3CB371","#DA70D6","#00FF00","#87CEFA","#7FFFD4","#7B68EE","#FF0040","#00BFFF","#FFFF00","#90EE90","#BA55D3","#CC7722","#F6E3CE","#EE82EE","#87CEEB","#CD5C5C","#DAA520","#FF69B4","#32CD32","#F8F8FF","#20B2AA","#B0E0E6"];
+
+var words=new Array();
+function cellClick(idx)
+{
+	
+	alert(idx);
+	//localStorage.setItem("wordFilter", word);
+	//window.location.href = "wordsgame.html";
+}
+function createTable()
+{ 
+var username=localStorage.getItem("currentUserName");
+var username="You login as "+username;
+document.getElementById("login").innerHTML=username;
+       var idg=0;
+	   var firstLetter="a";
+	   var colorcounter=0;
+      //var e = document.body; // whatever you want to append the rows to: 
+      for(var i = 0; i < words.length; i++){ 
+        var row = document.createElement("div"); 
+        row.className = "Row"; 
+        for(var x = 1; x <= 3; x++)
+		{ 
+            var cell = document.createElement("div"); 
+            cell.className = "Cell"; 
+			
+			if(words[i]!=undefined)
+			{
+			   cell.id=words[i].id;
+			   if(x==1)
+			   {
+               cell.innerText = words[i].word;
+			   }
+			   if(x==2)
+			   {
+			   cell.innerText = words[i].customTranslation;
+			   }
+			   if(x==3)
+			   {
+			   cell.innerText = words[i].id;
+			   }
+			   var bgcolor="";
+			   if(words[i].isLearned==false)
+			   {
+				   if(i%2==0)
+				   {
+				   bgcolor="background-color:"+colors[0]+";";
+				   }
+				   else
+				   {
+					bgcolor="background-color:"+colors[2]+";";
+				   }
+			   }
+			   else
+			   {
+			     bgcolor="background-color:"+colors[4]+";";
+			   }
+			    
+			   cell.setAttribute("style",bgcolor);	
+			   var clickfunc="cellClick(this.id)";
+			   cell.setAttribute("onclick",clickfunc);
+			   /*
+			  
+			   if(combs[idg][0]!=firstLetter)
+			   {
+			       firstLetter=combs[idg][0];
+				   colorcounter++;
+			   }
+			   var bgcolor="background-color:"+colors[colorcounter]+";";
+			   cell.setAttribute("style",bgcolor);	
+			   */
+			}
+			//idg++;
+            row.appendChild(cell); 
+        } 
+         document.getElementById("wrapper").appendChild(row); 
+      }      
+
+}
+	function getUsersWordsList()
+	{
+	   var prefix=localStorage.getItem("wordFilter");
+	   var userId=localStorage.getItem("currentUserId");
+	   var username=localStorage.getItem("currentUserName");
+	   //var wfilter=localStorage.getItem("wordFilter");
+	   username="You login as "+username;
+	   document.getElementById("login").innerHTML=username;
+	   
+	   
+	   var path="http://localhost:8080/getcardsedit?&userId=";
+		path+=userId;
+		path+="&prefix=";
+		path+=prefix;
+		$.post(
+		  path,
+		  "" ,
+		  onAjaxSuccess,
+		  "json"
+		);
+	}
+	function onAjaxSuccess(data)
+	{
+	//alert (data);
+	  words=new Array();
+	  $.each( data, function( key, val )
+	  {
+		var wordObj=new Object;
+		//var ck=[val.word ,val.customTranslation,val.id,val.isLearned];	
+		wordObj.word=val.word;
+		wordObj.customTranslation=val.customTranslation;
+		wordObj.id=val.id;
+		wordObj.isLearned=val.isLearned;
+		words.push(wordObj);
+	  })
+	  
+	  createTable();
+	}	
+//  http://jsfiddle.net/markgonz007/3zo91e1o/
+//  https://www.w3schools.com/html/html5_webstorage.asp
+//  https://developer.mozilla.org/ru/docs/Web/API/Storage/setItem
+//  https://htmlacademy.ru/blog/29-display-table-anti-hero
+//  https://css-tricks.com/almanac/properties/f/float/
+//  http://www.dummies.com/web-design-development/css3/using-the-div-tag-to-create-tables/
+</script>
+<script src="jquery-3.2.1.min.js"></script>
+<body>
+ <div class="c_path" style="font-size:20px;"> 
+   /<a href="management.html">Management</a>  / <a href="wordcardsgrid.html">Grid</a> /
+</div>
+
+<h2>Words list</h2>
+<br/>
+<h2 id="login" style="" ></h2>
+<br/>
+<div id='wrapper' class="Table"></div>
+</body>
+<script>
+getUsersWordsList();
+</script>
+</html>
+
+<!--
+
+ <div class="c_path"> 
+                            
+                    <a href="/">Home</a>  / <a href="/china-trains/">Train</a> / <a href="/china-trains/international-tickets/">International Tickets</a> / 
+              
+ </div>
+-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+

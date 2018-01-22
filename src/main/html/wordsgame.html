@@ -1,0 +1,216 @@
+﻿<!DOCTYPE html>
+<html>
+<style>
+.container {
+    height:350px;
+    width: 90%;
+    border:1px solid black;
+	margin:auto;
+}
+.left {
+    height:340px;
+    width: 49%;
+    //border:1px solid black;
+	display: inline-block;
+	overflow:hidden;
+	text-align: center;
+}
+.right {
+    height:340px;
+    width: 49%;
+    //border:1px solid black;
+	display: inline-block;
+	overflow:hidden;
+	text-align: center;
+}
+.button {
+    height:40px;
+    width: 90%;
+    border:2px solid blue;		
+	vertical-align: middle;
+	text-align: center ;
+    display: inline-block;  
+    margin-bottom:3px;
+	font-size: 20pt;
+}
+.left:before {      /* create a full-height inline block pseudo-element */
+    content: ' ';
+    display: inline-block;
+    vertical-align: middle; /* vertical alignment of the inline element */
+    height: 100%;
+}
+.right:before {      /* create a full-height inline block pseudo-element */
+    content: ' ';
+    display: table-cell;
+    vertical-align: middle; /* vertical alignment of the inline element */
+    height: 100%;
+}
+</style>
+ <script src="./app/words.js"></script>
+
+<script >
+var divIds=["i1", "i2", "i3", "i4"];
+var currentId=0;
+var currentWord =null;
+var tuples=null;
+var userId=0;
+function getRandomArbitrary(min, max) {
+   var result=Math.random() * (max - min) + min;
+  return Math.floor(result) ;
+}
+
+function checkWord(idx)
+{
+   if(document.getElementById(idx).innerHTML==currentWord.translation)
+   {
+      setWordLearned(currentWord.id);
+	  if(currentId<tuples.length-1)
+	  {
+		  currentId++;	  
+		  startGame();
+		  var cfx=currentId+1;
+		  var learnedcount=""+cfx+" : "+tuples.length;
+		  document.getElementById("countx").innerHTML=learnedcount;
+	  }
+	  else
+	  {	      
+		  var learnedcount=""+tuples.length+" : "+tuples.length;
+		  document.getElementById("countx").innerHTML=learnedcount;
+		  for( var index=0;index<4;index++)
+		  {
+			 //document.getElementById(divIds[index]).innerHTML = "";	
+             document.getElementById(divIds[index]).style.visibility = "hidden";				 
+		  }
+		  document.getElementById("curWord").innerHTML = "END";
+	  }
+	  if(currentId==tuples.length-1)
+	  {
+	     //alert("ERROR");
+	  }
+   }
+   else
+   {
+       //alert("ERROR");
+   }
+}
+function startGame()
+{
+  //var filter=localStorage.getItem("wordFilter");
+  //tuples=getWordsByFilter(filter);
+  
+  currentWord = new Object();
+  currentWord.word=tuples[currentId][0];
+  currentWord.translation=tuples[currentId][1];
+  currentWord.id=tuples[currentId][2];
+  
+  document.getElementById("curWord").innerHTML = tuples[currentId][0];
+  
+  var clonedWords=tuples.slice(0);
+  clonedWords.splice(currentId, 1);
+  
+  for( var index=0;index<4;index++)
+  {
+     var vl=getRandomArbitrary(0,wordTuples.length);     
+	 var wordItem=wordTuples[vl];	 
+	 document.getElementById(divIds[index]).innerHTML = wordItem[1];
+	 clonedWords.splice(vl, 1);
+  }
+  var rightAnswer=getRandomArbitrary(0,4);
+  document.getElementById(divIds[rightAnswer]).innerHTML = currentWord.translation;
+}
+
+function getWordsByFilter(wfilter)
+{
+var wordArray=new Array();
+   
+/*
+    var wordArray=new Array();
+	for (var count=0;count<wordTuples.length;count++)
+	{
+	   if(wordTuples[count][0].startsWith(wfilter))
+	   {
+	      wordArray.push(wordTuples[count]);
+	   }
+	}
+	//alert(wordArray.length);
+	var learnedcount="1 : "+wordArray.length;
+		  document.getElementById("countx").innerHTML=learnedcount;
+return wordArray;
+		  */
+
+
+// var path="http://localhost:8080/wordcards?&userId=24&prefix=ad";
+var path="http://localhost:8080/wordcards?&userId=";
+path+=userId;
+path+="&prefix=";
+path+=wfilter;
+$.post(
+  path,
+  "" ,
+  onAjaxSuccess,
+  "json"
+);
+}
+function setWordLearned(wordCardId)
+{
+var path="http://localhost:8080/setwordlearned?&ids=";
+path+=wordCardId;
+$.post(
+  path,
+  "" ,
+  function(){},
+  "json"
+);
+}
+function start()
+{
+	var username=localStorage.getItem("currentUserName");
+	userId=localStorage.getItem("currentUserId");
+	var username="You login as "+username;
+	document.getElementById("login").innerHTML=username;
+	var filter=localStorage.getItem("wordFilter");
+	 getWordsByFilter(filter,userId);
+}
+function onAjaxSuccess(data)
+{
+//alert (data);
+  tuples=new Array();
+  $.each( data, function( key, val )
+  {
+    var wordObj=new Object;
+    var ck=[val.word ,val.customTranslation,val.id];	
+	tuples.push(ck);
+  })
+  var learnedcount="1 : "+tuples.length;
+  document.getElementById("countx").innerHTML=learnedcount;
+  startGame();
+}	
+</script>
+<script src="jquery-3.2.1.min.js"></script>
+<body>
+<h2 id="login" style="padding-left:20%;" ></h2>
+<br/>
+<h2 id="countx" style="padding-left:20%;"></h2>
+<div class="container">
+<div class="left">
+     <div class="button" id="curWord" >word</div>
+</div>
+<div class="right">
+<br/><br/><br/>
+    <div id="i1" class="button" onclick="checkWord(this.id)" >word</div>
+    
+    <div id="i2" class="button" onclick="checkWord(this.id)" >word</div>
+   
+    <div id="i3" class="button" onclick="checkWord(this.id)" >word</div>
+    
+    <div id="i4" class="button" onclick="checkWord(this.id)" >word</div>
+</div>
+</div>
+<br/>
+<a href="grid.html"  ><div style="padding-left:20%;"><h4 >Back to grid</h4><img src="./imgs/arrow.png" style="height:5%;width:5%;" ></div></a>
+</body>
+	<script>
+	   start();
+	   //  se pa
+	</script>
+</html>
