@@ -34,7 +34,7 @@ case class User(id:BigInt,email:String,nickname:String,password:String)
 case class WordsQuestion(userId:Int,pattern:String)
 case class WordItem(id:Int,word:String,translation:String)
 case class WordCard(id:String, userId:Int, wordId:Int,word:String, customTranslation:String, isLearned:Boolean)
-
+case class UpdateWordCard(id:String,translation:String)
 
 
 
@@ -128,6 +128,18 @@ object Program extends App
             val actor = actorSystem.actorOf(Props[WordsDBActor])
             onSuccess((actor ? ("wordcards",userId,prefix)).mapTo[List[WordCard]]) { result =>
               complete(compactRender(decompose(result)))
+            }
+          }
+        }~
+        path("updatewordcard")
+        {
+          entity(as[String]) {
+            wordCardUpdateJson => {
+              val updateWordTry = parse(wordCardUpdateJson).extract[UpdateWordCard];
+              val actor = actorSystem.actorOf(Props[WordsDBActor])
+              onSuccess((actor ? ("updatewordcard", updateWordTry.id, updateWordTry.translation)).mapTo[String]) { result =>
+                complete(compactRender(decompose(result)))
+              }
             }
           }
         }~

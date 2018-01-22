@@ -187,13 +187,21 @@ object MongoHelper
     //println(result)
     stringified
   }
-def setWordCardLearned(wordCardId:String): Unit =
+  def UpdateWordCardsetLearned(wordCardId:String): Unit =
   {
     val mongoClient: MongoClient =  MongoClient(getMongoDbConfig(),None)
     val database: MongoDatabase = mongoClient.getDatabase("mydb")
     val collection: MongoCollection[Document] = database.getCollection("userwords")
     // val result:Long =collection.count(filter((and(equal("userId", userId),equal("isLearned",true))))).results().asInstanceOf[Long]
     val result =collection.updateOne(equal("_id", BsonObjectId(wordCardId)), set("isLearned", true)).headResult()
+  }
+  def UpdateWordCardsetTranslation(wordCardId:String,translation:String): Unit =
+  {
+    val mongoClient: MongoClient =  MongoClient(getMongoDbConfig(),None)
+    val database: MongoDatabase = mongoClient.getDatabase("mydb")
+    val collection: MongoCollection[Document] = database.getCollection("userwords")
+    // val result:Long =collection.count(filter((and(equal("userId", userId),equal("isLearned",true))))).results().asInstanceOf[Long]
+    val result =collection.updateOne(equal("_id", BsonObjectId(wordCardId)), set("customTranslation", translation)).headResult()
   }
 }
 

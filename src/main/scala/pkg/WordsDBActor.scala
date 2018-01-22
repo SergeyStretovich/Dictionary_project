@@ -14,7 +14,7 @@ class WordsDBActor extends Actor
     }
     case ("setwordlearned",wordCardId:String)=>
     {
-        val user=MongoHelper.setWordCardLearned(wordCardId)
+        MongoHelper.UpdateWordCardsetLearned(wordCardId)
         sender() ! "true"
 
       self ! PoisonPill
@@ -30,6 +30,13 @@ class WordsDBActor extends Actor
       val wordCards=MongoHelper.getUserWordCardsToEdit(userId,prefix)
       sender() ! wordCards
 
+      self ! PoisonPill
+    }
+    case ("updatewordcard",wordCardId:String,translation:String)=>
+    {
+      MongoHelper.UpdateWordCardsetTranslation(wordCardId,translation)
+      println(translation)
+      sender() ! "true"
       self ! PoisonPill
     }
     case _=>  sender() ! "something wrong"
