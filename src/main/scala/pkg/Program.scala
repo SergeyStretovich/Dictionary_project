@@ -35,14 +35,13 @@ case class WordsQuestion(userId:Int,pattern:String)
 case class WordItem(id:Int,word:String,translation:String)
 case class WordCard(id:String, userId:Int, wordId:Int,word:String, customTranslation:String, isLearned:Boolean)
 case class UpdateWordCard(id:String,translation:String)
+case class InsertWordCard(userId:Int,word:String,translation:String)
 
 
 
-//  mike@yahoo.com   pass
 object Program extends App
 {
-  //val postgresDbString=getPostgresDbConfig()
-  //val mongoDbString=getMongoDbConfig()
+
   implicit val actorSystem = ActorSystem("system")
   implicit val actorMaterializer = ActorMaterializer()
   implicit val formats = net.liftweb.json.DefaultFormats
@@ -143,6 +142,18 @@ object Program extends App
             }
           }
         }~
+        path("insertwordcard")
+        {
+          entity(as[String]) {
+            wordCardInsertJson => {
+              val insertWordTry = parse(wordCardInsertJson).extract[InsertWordCard];
+              val actor = actorSystem.actorOf(Props[WordsDBActor])
+              onSuccess((actor ? ("insertwordcard", insertWordTry.userId,insertWordTry.word, insertWordTry.translation)).mapTo[String]) { result =>
+                complete(compactRender(decompose(result)))
+              }
+            }
+          }
+        }~
       path("allusers") {
         entity(as[String]) {
           wordJson =>
@@ -160,24 +171,5 @@ object Program extends App
   Http().bindAndHandle(route,"localhost",8080)
 
   println("server started at 8080")
- // MongoHelper.insertWordCardsTotal(24)
-  //MongoHelper.getUserWordsTotal().foreach(x=>printUserWord(x))
-  //MongoHelper.getUserWordCards(24,"as").foreach(x=>println(x))
-  //MongoHelper.getWordsTotal().foreach(x=>println(x))
-  //MongoHelper.getUserLearnedWordsCount(24)
-  //MongoHelper.setWordCardLearned("5a61e1a987be601444cb3248")
- // MongoHelper.setWordCardLearned("5a61e1a987be601444cb3241")
-  //MongoHelper.setWordCardLearned("5a61e1a987be601444cb323a")
-  //MongoHelper.getUserLearnedWordsCount(24)
 
-  def printUserWord(word:WordCard): Unit =
-  {
-    println("_id="+word.id+" userId="+word.userId+" wordId="+word.wordId+" transl="+word.customTranslation+" isLearned="+word.isLearned)
-  }
 }
-
-//  postgre port  5432   "C:\Program Files\MongoDB\Server\3.6\bin\mongod"
-/*
-{"userId":1,"pattern":"ad"}
-
- */

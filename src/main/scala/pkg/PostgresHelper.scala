@@ -7,10 +7,11 @@ import scala.collection.mutable.ListBuffer
 import pkg.User
 
 object PostgresHelper {
-  var postgresAccessString=""
-  def getPostgresDbConfig():String=
-  {
-    if(postgresAccessString=="") {
+  var postgresAccessString = ""
+
+  //  Для чего нужна эта функция ?
+  def getPostgresDbConfig(): String = {
+    if (postgresAccessString == "") {
       val dbName = ConfigFactory.load().getString("conf.db.postgres.name.value")
       val host = ConfigFactory.load().getString("conf.db.postgres.host.value")
       val user = ConfigFactory.load().getString("conf.db.postgres.user.value")
@@ -20,86 +21,81 @@ object PostgresHelper {
     }
     postgresAccessString
   }
-   def selectAllUsers(): List[User] =
-  {
-    var users=new ListBuffer[User]
+  //  Для чего нужна эта функция ?
+  def selectAllUsers(): List[User] = {
+    var users = new ListBuffer[User]
 
     classOf[org.postgresql.Driver]
-    val con_st =getPostgresDbConfig()
+    val con_st = getPostgresDbConfig()
     val conn = DriverManager.getConnection(con_st)
     try {
       val stm = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
 
       val rs = stm.executeQuery("SELECT * from Users")
 
-      while(rs.next) {
-        users+=User(rs.getLong("id"),rs.getString("email"),rs.getString("nickname"),rs.getString("password"))
+      while (rs.next) {
+        users += User(rs.getLong("id"), rs.getString("email"), rs.getString("nickname"), rs.getString("password"))
       }
     } finally {
       conn.close()
     }
     users.toList
   }
-
-  def selectOneUser(id:Int): User =
-  {
-    var usr:User=null
+  //  Для чего нужна эта функция ?
+  def selectOneUser(id: Int): User = {
+    var usr: User = null
     classOf[org.postgresql.Driver]
-    val con_st =getPostgresDbConfig()
-  val conn = DriverManager.getConnection(con_st)
+    val con_st = getPostgresDbConfig()
+    val conn = DriverManager.getConnection(con_st)
     try {
       val stm = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
       val rs = stm.executeQuery(s"SELECT * from Users where id=${id}")
 
-      while(rs.next) {
-         usr=User(rs.getLong("id"),rs.getString("email"),rs.getString("nickname"),rs.getString("password"))
+      while (rs.next) {
+        usr = User(rs.getLong("id"), rs.getString("email"), rs.getString("nickname"), rs.getString("password"))
       }
-      if(usr==null)
-      {
-        usr=User(0,"declined","declined","declined")
+      if (usr == null) {
+        usr = User(0, "declined", "declined", "declined")
       }
     } finally {
       conn.close()
     }
     usr
   }
-
-  def selectOneUser(email:String,password:String): User =
-  {
-    var usr:User=null
+  //  Для чего нужна эта функция ?
+  def selectOneUser(email: String, password: String): User = {
+    var usr: User = null
     classOf[org.postgresql.Driver]
-    val con_st =getPostgresDbConfig()
+    val con_st = getPostgresDbConfig()
     val conn = DriverManager.getConnection(con_st)
     try {
       val stm = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
 
       val rs = stm.executeQuery(s"SELECT * from Users where email='${email}' and password='${password}';")
-      while(rs.next) {
-        usr=User(rs.getLong("id"),rs.getString("email"),rs.getString("nickname"),rs.getString("password"))
+      while (rs.next) {
+        usr = User(rs.getLong("id"), rs.getString("email"), rs.getString("nickname"), rs.getString("password"))
       }
-      if(usr==null)
-      {
-        usr=User(0,"declined","declined","declined")
+      if (usr == null) {
+        usr = User(0, "declined", "declined", "declined")
       }
     } finally {
       conn.close()
     }
     usr
   }
-
-  def insertUser(email:String,nickName:String,password:String):Int=
-  {
-    var insertedId:Int=0
+  //  Для чего нужна эта функция ?
+  def insertUser(email: String, nickName: String, password: String): Int = {
+    var insertedId: Int = 0
     classOf[org.postgresql.Driver]
-    val con_st =getPostgresDbConfig()
+    val con_st = getPostgresDbConfig()
     val conn = DriverManager.getConnection(con_st)
     try {
       val stm = conn.createStatement()
 
-      val rs = stm.executeUpdate(s"INSERT INTO users (email,nickname, password)   VALUES ('${email}', '${nickName}','${password}'); ",Statement.RETURN_GENERATED_KEYS)
-      val keyset=stm.getGeneratedKeys()
+      val rs = stm.executeUpdate(s"INSERT INTO users (email,nickname, password)   VALUES ('${email}', '${nickName}','${password}'); ", Statement.RETURN_GENERATED_KEYS)
+      val keyset = stm.getGeneratedKeys()
       keyset.next()
-      insertedId=keyset.getInt(1)
+      insertedId = keyset.getInt(1)
     } finally {
       conn.close()
     }
